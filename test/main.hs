@@ -1,13 +1,11 @@
 -- import Test.HUnit hiding (Test)
-import Test.Hspec.Monadic (Specs, describe, it, hspecX)
-import Test.Hspec.HUnit()
-import Test.Hspec.QuickCheck(prop)
+import Test.Hspec
 import Test.QuickCheck
 import Data.Bson
 import FileLocation (debug)
 
 main :: IO ()
-main = hspecX specs
+main = hspec spec
 
 instance Arbitrary ObjectId where
   arbitrary = do
@@ -17,13 +15,13 @@ instance Arbitrary ObjectId where
       i <- arbitrary
       return $ Oid t $ composite m p i
 
-specs :: Specs
-specs = do
+spec :: Spec
+spec = do
   describe "ObjectId" $ do
-    prop "read <-> show" $ \objId ->
+    it "read <-> show" $ property $ \objId ->
       (debug . read . show . debug) objId == (objId :: ObjectId)
 
   describe "roundTo" $ do
-    prop "round" $ \d ->
+    it "round" $ property $ \d ->
       let r =  roundTo (1 / 10) (d :: Double)
       in  r == roundTo (1 / 10) r
